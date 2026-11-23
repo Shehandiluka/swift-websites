@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "swiftclean-fleet",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  // Wrangler creates the KV namespace automatically on first deploy.
+  // (Older Wrangler: run `npx wrangler kv namespace create FLEET` and add "id": "<id>" below.)
+  "kv_namespaces": [{ "binding": "FLEET" }],
+  "routes": [{ "pattern": "fleet.swiftlk.com", "custom_domain": true }]
+}

@@ -1,0 +1,122 @@
+{
+  "name": "Swift Hub catalog",
+  "publisher": "SwiftPayPOS (Private) Limited",
+  "updated": "2026-11-23",
+  "apps": [
+    {
+      "id": "swiftclean",
+      "name": "SwiftClean",
+      "category": "PC care",
+      "tagline": "Clean, speed up and protect your PC — every Pro tool included.",
+      "description": "SwiftClean removes junk files, browser leftovers and old Windows updates, finds duplicates and huge files, speeds up startup and keeps your drivers and apps healthy.",
+      "features": [
+        "Junk & privacy cleaner for all browsers",
+        "Disk Analyzer with treemap, duplicates and similar photos",
+        "Startup manager, boot time and System Monitor",
+        "Software updater, registry cleaner, disk & battery health",
+        "Video compressor and Space Saver",
+        "Sinhala and English"
+      ],
+      "regKey": "SwiftClean",
+      "exe": "SwiftClean.exe",
+      "manifest": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/swiftclean/latest.json",
+      "latest": {
+        "version": "1.0.2",
+        "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftclean-v1.0.2/SwiftClean-Setup-1.0.2.exe",
+        "sha256": "cc4a173198a1ba54b752ba357e3595283ab8d4e3ca6563a0d816c89d0264e005",
+        "size": 74768878,
+        "date": "2026-11-23",
+        "notes": [
+          "New: Space Saver – smart suggestions to free space (old videos, installers, disk images, big downloads)",
+          "New: Similar Photos, Video Compressor (H.265, uses your GPU), Empty Folders & Broken Shortcuts",
+          "New: Disk Analyzer treemap, System Monitor, Disk & Battery Health, Boot time, Privacy Tweaks",
+          "New: Multi-PC Dashboard with remote clean, Sinhala language, Diagnostics & error reports"
+        ]
+      },
+      "website": "https://swiftlk.com",
+      "icon": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/icons/swiftclean.png"
+    },
+    {
+      "id": "swiftzip",
+      "name": "SwiftZip",
+      "category": "Utilities",
+      "tagline": "Open and create ZIP, RAR, 7z and 40+ formats — all Pro features free.",
+      "description": "A fast, modern archiver powered by 7-Zip. Right-click to compress or extract, protect archives with passwords and AES-256, split big files and make self-extracting EXEs.",
+      "features": [
+        "ZIP, RAR, 7z, TAR, GZ, ISO and many more",
+        "Password protection with AES-256",
+        "Split archives, self-extracting EXE, repair",
+        "Explorer right-click menu",
+        "Batch extract and convert"
+      ],
+      "regKey": "SwiftZip",
+      "exe": "SwiftZip.exe",
+      "manifest": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/swiftzip/latest.json",
+      "latest": {
+        "version": "1.0.1",
+        "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftzip-v1.0.1/SwiftZip-Setup-1.0.1.exe",
+        "sha256": "f9c5d4073e08c99cb09b5cf392a917cf25db92e5476ca12ed4d4107a0b556e0b",
+        "size": 75382926,
+        "date": "2026-11-23",
+        "notes": [
+          "All Pro features are now free for everyone: self-extracting archives, split volumes, convert, batch extract and password manager",
+          "Small fixes in the file list"
+        ]
+      },
+      "website": "https://swiftlk.com",
+      "icon": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/icons/swiftzip.png"
+    },
+    {
+      "id": "swiftbrowser",
+      "name": "Swift Browser",
+      "category": "Internet",
+      "tagline": "Fast, free and ad-free web browser built on Chromium.",
+      "description": "Swift Browser blocks ads, trackers and cookie pop-ups out of the box, and adds WhatsApp, Messenger and AI chat in a sidebar.",
+      "features": [
+        "Swift Shield ad & tracker blocker",
+        "Sidebar: WhatsApp, Messenger, Telegram, ChatGPT, Gemini",
+        "Reader view, translate to Sinhala, dark mode for any site",
+        "Video downloader, screenshots, split screen",
+        "Password manager and private windows"
+      ],
+      "regKey": "SwiftBrowser",
+      "exe": "SwiftBrowser.exe",
+      "manifest": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/swiftbrowser/latest.json",
+      "latest": {
+        "version": "1.0.0",
+        "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftbrowser-v1.0.0/SwiftBrowser-Setup-1.0.0.exe",
+        "sha256": "a46d1a636182b722bb2ff20b4e9e1e8c49f3b90723064c8372ab2afd9e76d043",
+        "size": 107360589,
+        "date": "2026-11-23",
+        "notes": [
+          "First release of Swift Browser – fast, Chromium-based, totally free",
+          "Swift Shield: built-in ad, tracker, malware & cookie-popup blocker",
+          "Sidebar apps: WhatsApp, Messenger, Telegram, ChatGPT, Gemini, Claude",
+          "Reader view with read-aloud, translate to Sinhala, dark mode for any site",
+          "Video downloader, picture-in-picture, full-page screenshots, QR codes",
+          "Split screen, sleeping tabs, private windows, password manager"
+        ]
+      },
+      "website": "https://swiftlk.com",
+      "icon": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/icons/swiftbrowser.png"
+    },
+    {
+      "id": "swiftakuru",
+      "name": "Swift Akuru",
+      "category": "Keyboard",
+      "platform": "ios",
+      "platformLabel": "iPhone",
+      "tagline": "Sinhala (Singlish) keyboard for iPhone with AI translate and grammar fix.",
+      "description": "Type Singlish and get Sinhala instantly, with smart suggestions, clipboard history, emoji and Swift AI.",
+      "features": [
+        "Singlish → සිංහල live",
+        "AI translate, grammar fix and reply ideas",
+        "Clipboard manager and themes"
+      ],
+      "link": "https://github.com/Shehandiluka/swiftakuru/releases/latest",
+      "linkLabel": "Download .ipa",
+      "website": "https://github.com/Shehandiluka/swiftakuru",
+      "icon": "https://raw.githubusercontent.com/Shehandiluka/swift-releases/main/icons/swiftakuru.png"
+    }
+  ]
+}

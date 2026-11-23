@@ -1,0 +1,13 @@
+{
+  "version": "1.0.2",
+  "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftclean-v1.0.2/SwiftClean-Setup-1.0.2.exe",
+  "sha256": "cc4a173198a1ba54b752ba357e3595283ab8d4e3ca6563a0d816c89d0264e005",
+  "size": 74768878,
+  "date": "2026-11-23",
+  "notes": [
+    "New: Space Saver – smart suggestions to free space (old videos, installers, disk images, big downloads)",
+    "New: Similar Photos, Video Compressor (H.265, uses your GPU), Empty Folders & Broken Shortcuts",
+    "New: Disk Analyzer treemap, System Monitor, Disk & Battery Health, Boot time, Privacy Tweaks",
+    "New: Multi-PC Dashboard with remote clean, Sinhala language, Diagnostics & error reports"
+  ]
+}

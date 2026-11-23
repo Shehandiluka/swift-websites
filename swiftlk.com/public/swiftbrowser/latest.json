@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftbrowser-v1.0.0/SwiftBrowser-Setup-1.0.0.exe",
+  "sha256": "a46d1a636182b722bb2ff20b4e9e1e8c49f3b90723064c8372ab2afd9e76d043",
+  "size": 107360589,
+  "date": "2026-11-23",
+  "notes": [
+    "First release of Swift Browser – fast, Chromium-based, totally free",
+    "Swift Shield: built-in ad, tracker, malware & cookie-popup blocker",
+    "Sidebar apps: WhatsApp, Messenger, Telegram, ChatGPT, Gemini, Claude",
+    "Reader view with read-aloud, translate to Sinhala, dark mode for any site",
+    "Video downloader, picture-in-picture, full-page screenshots, QR codes",
+    "Split screen, sleeping tabs, private windows, password manager"
+  ]
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download — Swift software for Windows & iPhone</title>
+<meta name="description" content="Download Swift Hub, SwiftClean, SwiftZip, Swift Browser and Swift Akuru. Free, always up to date.">
+<link rel="canonical" href="https://swiftlk.com/download/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  body { background: #050a1a; color: #fff; }
+  .dl-hero { padding: 150px 0 60px; text-align: center; background: radial-gradient(1000px 500px at 50% -10%, rgba(91,75,255,.45), transparent 70%); }
+  .dl-hero p { color: #aeb8dc; max-width: 640px; margin: 16px auto 0; font-size: 1.1rem; }
+  .hubcard { display: flex; gap: 28px; align-items: center; padding: 34px; border-radius: 24px; background: linear-gradient(120deg, #1e3a8a, #4c1d95 60%, #7c3aed); margin: 0 auto 40px; max-width: 980px; box-shadow: 0 30px 80px -30px rgba(124,58,237,.6); }
+  .hubcard img { width: 110px; height: 110px; }
+  .hubcard h2 { margin: 0 0 6px; font-size: 1.9rem; }
+  .hubcard p { color: #dbe4ff; margin: 0 0 18px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 980px; margin: 0 auto; }
+  .app { background: #0d1530; border: 1px solid #1e2a50; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .app .top { display: flex; gap: 14px; align-items: center; }
+  .app img { width: 56px; height: 56px; border-radius: 14px; }
+  .app h3 { margin: 0; font-size: 1.15rem; }
+  .app .meta { color: #8c98c4; font-size: .85rem; }
+  .app p { color: #aeb8dc; margin: 0; font-size: .95rem; flex: 1; }
+  .app ul { margin: 0; padding-left: 18px; color: #aeb8dc; font-size: .85rem; }
+  .note { max-width: 980px; margin: 40px auto 100px; color: #8c98c4; font-size: .9rem; line-height: 1.7; background: #0d1530; border: 1px solid #1e2a50; border-radius: 16px; padding: 20px 24px; }
+  .note b { color: #fff; }
+  @media (max-width: 700px) { .hubcard { flex-direction: column; text-align: center; } }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a href="/" class="logo" aria-label="Swift home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2563ff"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#lg)"/><path d="M23.5 7 12 22.5h7.2L17 33l11.5-15.5h-7.2z" fill="#fff"/></svg>
+      Swift
+    </a>
+    <nav class="nav-links"><a href="/#products">Products</a><a href="/download/">Download</a><a href="/#about">About</a><a href="/#contact">Contact</a></nav>
+    <a href="/#contact" class="btn btn-primary">Get in touch</a>
+  </div>
+</header>
+
+<section class="dl-hero">
+  <div class="wrap">
+    <h1>Download Swift software</h1>
+    <p>Free for everyone. Get <b>Swift Hub</b> once — it installs every Swift app with one click and keeps them all up to date automatically.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="hubcard">
+    <img src="/assets/swifthub.png" alt="Swift Hub">
+    <div style="flex:1">
+      <h2>Swift Hub <span id="v-hub" style="font-size:1rem;opacity:.75"></span></h2>
+      <p>All Swift apps in one place: install, update and remove SwiftClean, SwiftZip, Swift Browser and every new app — automatic updates in the background.</p>
+      <a class="btn btn-light" id="dl-hub" href="#">Download Swift Hub for Windows</a>
+      <div style="margin-top:10px;font-size:.85rem;color:#c7d2fe" id="sz-hub">Windows 10 &amp; 11 · 64-bit</div>
+    </div>
+  </div>
+
+  <div class="grid3" id="apps"></div>
+
+  <div class="note">
+    <b>Windows says “Windows protected your PC”?</b> Our apps are new and not yet code-signed. Click <b>More info → Run anyway</b>. Every download is checked with SHA-256 by Swift Hub and by each app's own updater.<br>
+    <b>Already installed?</b> Each app updates itself — or open Swift Hub and press <b>Update all</b>.
+  </div>
+</div>
+
+<script>
+const APPS = [
+  { id: 'swiftclean', name: 'SwiftClean', cat: 'PC care', desc: 'Clean, speed up and protect your PC — every Pro tool included.', feats: ['Junk & privacy cleaner', 'Disk Analyzer, duplicates, startup manager', 'Software updater, System Monitor'] },
+  { id: 'swiftzip', name: 'SwiftZip', cat: 'Utilities', desc: 'Open and create ZIP, RAR, 7z and 40+ formats — all Pro features free.', feats: ['AES-256 passwords', 'Split archives & self-extracting EXE', 'Explorer right-click menu'] },
+  { id: 'swiftbrowser', name: 'Swift Browser', cat: 'Internet', desc: 'Fast, free and ad-free web browser built on Chromium.', feats: ['Built-in ad & tracker blocker', 'WhatsApp, Messenger & AI sidebar', 'Reader view, translate to Sinhala'] },
+];
+const fmt = b => b ? (b / 1048576).toFixed(0) + ' MB' : '';
+async function latest(path) { try { const r = await fetch(path, { cache: 'no-store' }); return r.ok ? r.json() : null; } catch { return null; } }
+(async () => {
+  const hub = await latest('/hub/latest.json');
+  if (hub) { document.getElementById('dl-hub').href = hub.url; document.getElementById('v-hub').textContent = 'v' + hub.version; document.getElementById('sz-hub').textContent = `Windows 10 & 11 · 64-bit · ${fmt(hub.size)}`; }
+  const box = document.getElementById('apps');
+  for (const a of APPS) {
+    const m = await latest(`/${a.id}/latest.json`);
+    box.insertAdjacentHTML('beforeend', `<div class="app"><div class="top"><img src="/assets/${a.id}.png" alt=""><div><h3>${a.name}</h3><div class="meta">${a.cat}${m ? ' · v' + m.version + ' · ' + fmt(m.size) : ''}</div></div></div>
+      <p>${a.desc}</p><ul>${a.feats.map(f => `<li>${f}</li>`).join('')}</ul>
+      <a class="btn btn-primary" href="${m ? m.url : '#'}">Download for Windows</a></div>`);
+  }
+  box.insertAdjacentHTML('beforeend', `<div class="app"><div class="top"><img src="/assets/swiftakuru.png" alt=""><div><h3>Swift Akuru</h3><div class="meta">Keyboard · iPhone</div></div></div>
+    <p>Singlish → සිංහල keyboard for iPhone with AI translate, grammar fix, clipboard history and themes.</p><ul><li>Install with SideStore, AltStore or Sideloadly</li><li>Updates inside the app</li></ul>
+    <a class="btn btn-primary" href="https://github.com/Shehandiluka/swiftakuru/releases/latest">Download .ipa</a></div>`);
+})();
+</script>
+</body>
+</html>

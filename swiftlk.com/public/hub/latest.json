@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swifthub-v1.0.0/SwiftHub-Setup-1.0.0.exe",
+  "sha256": "f951cdef056afa07c55c9cb4927de726ce6738fe38d42e7238f16e5d9485895e",
+  "size": 104571325,
+  "date": "2026-11-23",
+  "notes": [
+    "First release of Swift Hub – install and update all Swift software in one place",
+    "One-click install for SwiftClean, SwiftZip and Swift Browser",
+    "Update all with a single Windows permission prompt",
+    "Automatic background update checks with notifications, runs in the tray",
+    "Every download is verified with SHA-256 before installing"
+  ]
+}

@@ -1,0 +1,22 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+/assets/*
+  Cache-Control: public, max-age=604800
+/swiftclean/latest.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *
+/swiftzip/latest.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *
+/swiftbrowser/latest.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *
+/hub/latest.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *
+/hub/catalog.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *

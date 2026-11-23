@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shehan — Full-stack developer &amp; founder of Swift</title>
+<meta name="description" content="Shehan is a full-stack developer from Sri Lanka and founder of Swift — builder of SwiftPayPOS, WealthFlow and SwiftClean.">
+<meta property="og:title" content="Shehan — Full-stack developer & founder of Swift">
+<meta property="og:description" content="I build products people use every day: retail POS & ERP, personal finance and Windows tools.">
+<meta property="og:image" content="https://shehanx.com/assets/og.png">
+<meta property="og:url" content="https://shehanx.com/">
+<meta name="theme-color" content="#050a1a">
+<link rel="canonical" href="https://shehanx.com/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 56px; align-items: center; }
+  .avatar { position: relative; width: min(300px, 100%); aspect-ratio: 1; margin-left: auto; border-radius: 32px; background: var(--grad); padding: 3px; }
+  .avatar-inner { width: 100%; height: 100%; border-radius: 30px; background: var(--navy-900); display: grid; place-items: center; overflow: hidden; position: relative; }
+  .avatar-inner .initials { font-family: var(--display); font-weight: 800; font-size: 8rem; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .avatar-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .avatar-badge { position: absolute; left: -22px; bottom: 28px; background: #fff; color: var(--ink); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); display: flex; gap: 10px; align-items: center; font-weight: 650; font-size: .9rem; }
+  .avatar-badge i { width: 10px; height: 10px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 4px #dcfce7; }
+  .work-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+  .work-card .shot { background: var(--navy-950); padding: 22px 22px 0; }
+  .work-card .shot img { width: 100%; aspect-ratio: 16 / 9.5; object-fit: cover; object-position: top left; border-radius: 10px 10px 0 0; border: 1px solid #1d2850; border-bottom: 0; }
+  .work-card .body { padding: 24px 26px 26px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .work-card .body .links-row { margin-top: auto; padding-top: 10px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: .78rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--grad-soft); color: #3d4fd6; }
+  .stack { display: flex; flex-wrap: wrap; gap: 10px; }
+  .stack span { padding: 10px 16px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-weight: 600; font-size: .92rem; box-shadow: var(--shadow); }
+  .step b { font-family: var(--display); font-size: 2.4rem; display: block; margin-bottom: 8px; }
+  .socials { display: flex; gap: 10px; margin-top: 26px; }
+  .socials a { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); color: #dbe3ff; }
+  .socials a:hover { background: rgba(255,255,255,.14); }
+  .socials svg { width: 20px; height: 20px; }
+  @media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } .avatar { display: none; } }
+  .about-grid > div:first-child { }
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Shehan","url":"https://shehanx.com","jobTitle":"Full-stack developer & founder","worksFor":{"@type":"Organization","name":"Swift (SwiftPayPOS (Private) Limited)","url":"https://swiftlk.com"},"email":"hello@shehanx.com","sameAs":["https://github.com/Shehandiluka"]}</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a href="#top" class="logo" aria-label="Shehan home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2563ff"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#lg)"/><text x="20" y="27" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-weight="800" font-size="17" fill="#fff">SX</text></svg>
+      <span data-cfg-text="displayName">Shehan</span>
+    </a>
+    <nav class="nav-links"><a href="#about">About</a><a href="#work">Work</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
+    <a href="#contact" class="btn btn-primary">Hire me</a>
+    <button class="menu-btn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+
+<section class="hero cine" id="top" data-pin="240" data-scene="hero">
+  <div class="pin-stage">
+    <div class="wrap hero-copy hero-grid">
+      <div>
+        <span class="pill"><b>Open</b> to projects &amp; collaborations</span>
+        <h1 style="margin-top:22px">Hi, I'm <span class="grad-text" data-cfg-text="displayName">Shehan</span>.<br>I build software people use every day.</h1>
+        <p class="lead" style="margin-top:22px">Full-stack developer and founder of <a href="https://swiftlk.com" style="color:#fff;font-weight:650">Swift</a>. I design, build and run real products — from the first idea to production.</p>
+        <div class="cta-row"><a href="#work" class="btn btn-primary">See my work</a><a href="#contact" class="btn btn-ghost">Get in touch</a></div>
+      </div>
+      <div class="avatar">
+        <div class="avatar-inner"><span class="initials">S</span><img src="/assets/me.jpg" alt="Photo of Shehan" data-fallback-hide></div>
+        <div class="avatar-badge"><i></i>Founder · Swift</div>
+      </div>
+    </div>
+    <div class="hero-device"><div class="tilt"><div class="fan">
+      <div class="window"><div class="window-bar"><i></i><i></i><i></i></div><img src="/assets/wealth.webp" alt="WealthFlow" width="1200" height="560"></div>
+      <div class="window"><div class="window-bar"><i></i><i></i><i></i></div><img src="/assets/pos.webp" alt="SwiftPayPOS" width="1200" height="660"></div>
+      <div class="window"><div class="window-bar"><i></i><i></i><i></i></div><img src="/assets/clean.webp" alt="SwiftClean" width="1180" height="733"></div>
+    </div></div></div>
+    <div class="scroll-hint">Scroll</div>
+  </div>
+</section>
+<section class="stats-band">
+  <div class="wrap">
+    <div class="stats" data-scrub>
+      <div><b data-count="3">3</b><span>Products shipped</span></div>
+      <div><b data-count="55" data-suffix="+">55+</b><span>Screens in SwiftPayPOS</span></div>
+      <div><b data-count="10" data-suffix="+">10+</b><span>AI agents &amp; bots built</span></div>
+      <div><b>Full-stack</b><span>Design → code → cloud</span></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="about" class="section-white">
+  <div class="wrap grid g2" style="gap:56px;align-items:start">
+    <div class="section-head" data-scrub style="margin:0">
+      <span class="eyebrow">About me</span>
+      <h2>I turn real problems into working products.</h2>
+    </div>
+    <div  data-scrub style="display:grid;gap:16px">
+      <p class="lead">I'm a self-driven developer from Galle, Sri Lanka. My work started with a practical need — my own shop needed a better point-of-sale system — and grew into Swift, a software company with three products.</p>
+      <p style="color:var(--ink-2)">I enjoy the whole journey: understanding how people actually work, designing simple screens, writing the code, wiring up the cloud and AI, and supporting users after launch. I care about speed, clean design and getting the small details right — like a receipt that prints perfectly on a 55&nbsp;mm thermal printer.</p>
+      <p style="color:var(--ink-2)">Alongside Swift, I build automation tools, AI agents and custom business systems for clients.</p>
+    </div>
+  </div>
+</section>
+
+<section id="work" class="section-white" style="padding-bottom:64px">
+  <div class="wrap">
+    <div class="section-head" data-scrub style="margin-bottom:0">
+      <span class="eyebrow">Featured work</span>
+      <h2>Products I've built and run.</h2>
+      <p class="lead">All three are live and used every day. Keep scrolling — each one plays like a short film.</p>
+    </div>
+  </div>
+</section>
+
+<section class="story" data-pin="420" data-scene="story" data-glows="rgba(61,90,255,.42)|rgba(34,211,238,.30)|rgba(124,92,255,.40)">
+  <div class="pin-stage">
+    <div class="story-head">Featured work</div>
+    <div class="wrap story-grid">
+      <div class="story-texts">
+        <article class="story-text">
+          <div class="product-tag"><div class="mark" style="background:linear-gradient(120deg,#2563ff,#8b5cf6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg></div><span>01 · Retail &amp; ERP</span></div>
+          <h3>SwiftPayPOS</h3>
+          <p class="lead">A retail business operating system I designed and built end to end — now running real shops every day.</p>
+          <ul class="ticks">
+            <li>POS billing, stock, multi-branch and accounting</li>
+            <li>Online storefront for every shop</li>
+            <li>A team of AI agents watching sales, stock and cash</li>
+            <li>React · TypeScript · Supabase · Edge Functions · Cloudflare</li>
+          </ul>
+          <div class="links-row"><a href="https://swiftpaypos.com" class="btn btn-primary" target="_blank" rel="noopener">Visit site</a><a href="https://swiftlk.com/#swiftpaypos" class="text-link" target="_blank" rel="noopener">Details →</a></div>
+        </article>
+        <article class="story-text">
+          <div class="product-tag"><div class="mark" style="background:linear-gradient(120deg,#22d3ee,#2563ff)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div><span>02 · Personal finance</span></div>
+          <h3>WealthFlow</h3>
+          <p class="lead">A money manager for accounts, cards and cash — with automation that turns bank SMS into ready-to-confirm drafts.</p>
+          <ul class="ticks">
+            <li>Accounts, budgets, categories and reports</li>
+            <li>Bank SMS → drafts through Apple Shortcuts</li>
+            <li>Split one payment into many expenses</li>
+            <li>React · Vite · Supabase · Cloudflare Workers</li>
+          </ul>
+          <div class="links-row"><a class="btn btn-primary" data-cfg="wealthflowUrl" data-fallback="https://swiftlk.com/#wealthflow" data-fallback-text="Learn more" target="_blank" rel="noopener"><span class="t">Open app</span></a><a href="https://swiftlk.com/#wealthflow" class="text-link" target="_blank" rel="noopener">Details →</a></div>
+        </article>
+        <article class="story-text">
+          <div class="product-tag"><div class="mark" style="background:linear-gradient(120deg,#2563ff,#06b6d4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg></div><span>03 · Windows desktop</span></div>
+          <h3>SwiftClean</h3>
+          <p class="lead">A PC cleaner and optimizer for Windows 10/11 with every pro tool included.</p>
+          <ul class="ticks">
+            <li>One-click Health Check and Custom Clean</li>
+            <li>Registry repair with automatic backups</li>
+            <li>Software &amp; driver updates, startup manager, monitoring</li>
+            <li>Electron · Node.js · PowerShell · NSIS installer</li>
+          </ul>
+          <div class="links-row"><a class="btn btn-primary" data-cfg="swiftcleanDownload" data-fallback="https://swiftlk.com/#swiftclean" data-fallback-text="Learn more"><span class="t">Download</span></a><a href="https://swiftlk.com/#swiftclean" class="text-link" target="_blank" rel="noopener">Details →</a></div>
+        </article>
+      </div>
+      <div class="story-visual">
+        <div class="window"><div class="window-bar"><i></i><i></i><i></i></div>
+          <div class="story-imgs">
+            <img class="story-img" src="/assets/pos.webp" alt="SwiftPayPOS dashboard" width="1200" height="660">
+            <img class="story-img" src="/assets/wealth.webp" alt="WealthFlow overview" width="1200" height="560">
+            <img class="story-img" src="/assets/clean.webp" alt="SwiftClean Health Check" width="1180" height="733">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap story-dots"><button type="button"><span></span>SwiftPayPOS</button><button type="button"><span></span>WealthFlow</button><button type="button"><span></span>SwiftClean</button></div>
+  </div>
+</section>
+
+<section class="more-projects">
+  <div class="wrap">
+    <h3 data-scrub style="margin:0 0 22px;font-size:1.5rem">More projects</h3>
+
+    <div class="grid g3">
+      <div class="card" data-scrub><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></div><h3>Workforce Management</h3><p style="margin-top:8px">HR, QR-code attendance, timesheets, payroll and payslips for an overseas employer.</p></div>
+      <div class="card" data-scrub><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div><h3>Market analysis tools</h3><p style="margin-top:8px">A Colombo Stock Exchange analyzer and AI-assisted trading bots with Telegram alerts, running in the cloud.</p></div>
+      <div class="card" data-scrub><div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></div><h3>Print automation</h3><p style="margin-top:8px">A cloud printing service and a WhatsApp agent that turns customer photos into print-ready pages.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="section-white">
+  <div class="wrap">
+    <div class="section-head" data-scrub>
+      <span class="eyebrow">Skills &amp; tools</span>
+      <h2>From the first screen to the cloud.</h2>
+    </div>
+    <div class="stack" data-scrub>
+      <span>React</span><span>TypeScript</span><span>JavaScript</span><span>Node.js</span><span>Vite</span><span>Tailwind CSS</span><span>Electron</span><span>Python</span><span>PostgreSQL</span><span>Supabase</span><span>Edge Functions</span><span>Cloudflare Workers</span><span>AWS EC2</span><span>Claude &amp; Gemini AI</span><span>AI agents</span><span>Telegram &amp; WhatsApp APIs</span><span>PowerShell</span><span>Git &amp; GitHub Actions</span><span>UI / UX design</span>
+    </div>
+    <div class="grid g3" style="margin-top:64px">
+      <div class="card step" data-scrub><b class="grad-text">01</b><h3>Understand</h3><p style="margin-top:8px">I start with how you work today — the real steps, the pain points, the numbers that matter.</p></div>
+      <div class="card step" data-scrub><b class="grad-text">02</b><h3>Build</h3><p style="margin-top:8px">Fast, clean, tested software, delivered in small steps you can try and give feedback on.</p></div>
+      <div class="card step" data-scrub><b class="grad-text">03</b><h3>Run &amp; improve</h3><p style="margin-top:8px">Hosting, backups, monitoring and steady improvements after launch — not just a handover.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-card" data-scrub>
+      <div>
+        <span class="eyebrow" style="color:#8fb3ff">Contact</span>
+        <h2 style="margin-top:14px">Have an idea? Let's build it.</h2>
+        <p style="margin-top:14px;font-size:1.08rem">Custom business systems, automation, AI agents or a product of your own — tell me what you need.</p>
+        <div class="socials">
+          <a href="https://github.com/Shehandiluka" data-cfg="github" aria-label="GitHub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.8 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></svg></a>
+          <a data-cfg="linkedin" data-hide-empty aria-label="LinkedIn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.5H3.5V9h3.6v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0z"/></svg></a>
+          <a data-cfg="facebook" data-hide-empty aria-label="Facebook" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>
+        </div>
+      </div>
+      <div class="contact-list">
+        <a href="mailto:hello@shehanx.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><div><small>Email</small>hello@shehanx.com</div></a>
+        <a href="https://swiftlk.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div><small>My company</small>swiftlk.com</div></a>
+        <a href="https://maps.google.com/?q=Galle,Sri+Lanka" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><small>Based in</small>Galle, Sri Lanka</div></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-bottom" style="margin-top:0;border-top:0;padding-top:0">
+    <span>© <span data-year>2026</span> <span data-cfg-text="fullName">Shehan</span>. Built with care in Sri Lanka.</span>
+    <span><a href="https://swiftlk.com">Swift</a> · <a href="https://swiftpaypos.com">SwiftPayPOS</a></span>
+  </div>
+</footer>
+
+<script src="/assets/site-config.js"></script>
+<script src="/assets/site.js"></script>
+</body>
+</html>

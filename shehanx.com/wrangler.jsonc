@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "shehanx-site",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public", "not_found_handling": "404-page" },
+  "routes": [
+    { "pattern": "shehanx.com", "custom_domain": true },
+    { "pattern": "www.shehanx.com", "custom_domain": true }
+  ]
+}

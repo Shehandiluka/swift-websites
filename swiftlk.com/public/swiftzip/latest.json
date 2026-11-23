@@ -1,0 +1,11 @@
+{
+  "version": "1.0.1",
+  "url": "https://github.com/Shehandiluka/swift-releases/releases/download/swiftzip-v1.0.1/SwiftZip-Setup-1.0.1.exe",
+  "sha256": "f9c5d4073e08c99cb09b5cf392a917cf25db92e5476ca12ed4d4107a0b556e0b",
+  "size": 75382926,
+  "date": "2026-11-23",
+  "notes": [
+    "All Pro features are now free for everyone: self-extracting archives, split volumes, convert, batch extract and password manager",
+    "Small fixes in the file list"
+  ]
+}
