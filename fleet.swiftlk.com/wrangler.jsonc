@@ -6,5 +6,7 @@
   // Wrangler creates the KV namespace automatically on first deploy.
   // (Older Wrangler: run `npx wrangler kv namespace create FLEET` and add "id": "<id>" below.)
   "kv_namespaces": [{ "binding": "FLEET" }],
-  "routes": [{ "pattern": "fleet.swiftlk.com", "custom_domain": true }]
+  "workers_dev": true,
+  // Add custom domains here once the domain is on this Cloudflare account, e.g.
+  // "routes": [{ "pattern": "swiftlk.com", "custom_domain": true }]
 }

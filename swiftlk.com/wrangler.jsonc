@@ -3,8 +3,7 @@
   "name": "swiftlk-site",
   "compatibility_date": "2026-11-01",
   "assets": { "directory": "./public", "not_found_handling": "404-page" },
-  "routes": [
-    { "pattern": "swiftlk.com", "custom_domain": true },
-    { "pattern": "www.swiftlk.com", "custom_domain": true }
-  ]
+  "workers_dev": true,
+  // Add custom domains here once the domain is on this Cloudflare account, e.g.
+  // "routes": [{ "pattern": "swiftlk.com", "custom_domain": true }]
 }
