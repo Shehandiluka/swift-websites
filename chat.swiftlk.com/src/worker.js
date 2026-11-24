@@ -140,7 +140,7 @@ async function authStart(req, env) {
   const b = await body(req);
   const p = phone(b.phone);
   const ph = await phoneHash(env, p);
-  await limit(env, "otp-ip:" + clientIP(req), 10, HOUR);
+  await limit(env, "otp-ip:" + clientIP(req), 30, HOUR);
   await limit(env, "otp-phone:" + ph, 3, 10 * 60);
   const fixed = await testCode(env, p);
   const code = fixed || String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
@@ -263,7 +263,7 @@ async function route(req, env, url) {
     const b = await body(req);
     const ph = await phoneHash(env, phone(b.phone));
     await limit(env, "lookup:" + me.id, 20, HOUR);
-    await limit(env, "lookup-ip:" + clientIP(req), 60, HOUR);
+    await limit(env, "lookup-ip:" + clientIP(req), 200, HOUR);
     const u = await env.DB.prepare("SELECT id, display_name, kem_pub, key_version FROM users WHERE phone_hash=? AND discoverable=1 AND deleted_at IS NULL").bind(ph).first();
     // Identical answer for: no account, hidden account, blocked, yourself.
     if (!u || u.id === me.id || await isBlockedEither(env, me.id, u.id)) return json({ found: false });
