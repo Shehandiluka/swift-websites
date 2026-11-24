@@ -132,6 +132,13 @@ async function testCode(env, ph) {
   try { const map = JSON.parse(row.v); return typeof map[ph] === "string" ? map[ph] : null; } catch { return null; }
 }
 
+// Testing only: while config 'test_otp_all' holds a 6-digit code, every number signs in with it and no SMS is sent.
+// Delete that config row to switch back to real SMS codes.
+async function testCodeAll(env) {
+  const row = await env.DB.prepare("SELECT v FROM config WHERE k='test_otp_all'").first();
+  return row && /^\d{6}$/.test(row.v) ? row.v : null;
+}
+
 async function sendSMS(env, to, text) {
   if (!env.TWILIO_ACCOUNT_SID || !env.TWILIO_AUTH_TOKEN || !env.TWILIO_FROM) fail(503, "sms_not_configured");
   const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`, {
@@ -148,7 +155,7 @@ async function authStart(req, env) {
   const ph = await phoneHash(env, p);
   await limit(env, "otp-ip:" + clientIP(req), 30, HOUR);
   await limit(env, "otp-phone:" + ph, 3, 10 * 60);
-  const fixed = await testCode(env, p);
+  const fixed = (await testCode(env, p)) || (await testCodeAll(env));
   const code = fixed || String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
   const t = now();
   await env.DB.prepare(
