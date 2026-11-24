@@ -36,7 +36,7 @@ globalThis.runChatTests = async function ({ BASE, CODE, A, B, C }) {
   const b = await login(B, "Tester B");
   const c = await login(C, "Tester C");
   // Reset discoverability/blocks from earlier runs.
-  for (const u of [a, b, c]) await api("/v1/me", { method: "PATCH", token: u.token, body: { discoverable: true } });
+  for (const u of [a, b, c]) await api("/v1/me", { method: "PATCH", token: u.token, body: { discoverable: true, allowRequests: true, readReceipts: true, profileVisibility: "everyone" } });
   for (const [x, y] of [[a, b], [b, a], [a, c], [c, a], [b, c], [c, b]]) await api("/v1/blocks/" + y.user.id, { method: "DELETE", token: x.token });
 
   let conv;
@@ -72,6 +72,17 @@ globalThis.runChatTests = async function ({ BASE, CODE, A, B, C }) {
     assert.equal(r1.status, 200); assert.equal(r1.body.conversationId, r2.body.conversationId);
     conv = r1.body.conversationId;
     await api("/v1/secret/leave", { method: "POST", token: a.token, body: { conversationId: conv } }); // reset from earlier runs
+  });
+  await test("message request: recipient sees a request, requester cannot accept it, recipient accepts", async () => {
+    const lb = await api("/v1/conversations", { token: b.token });
+    const cb = lb.body.conversations.find(x => x.id === conv);
+    assert.ok(cb && typeof cb.accepted === "boolean", "conversation has accepted flag");
+    if (!cb.accepted) {
+      assert.equal(cb.requestedBy, a.user.id);
+      assert.equal((await api("/v1/conversations/" + conv + "/accept", { method: "POST", token: a.token })).status, 403);
+    }
+    assert.equal((await api("/v1/conversations/" + conv + "/accept", { method: "POST", token: b.token })).status, 200);
+    assert.equal((await api("/v1/conversations", { token: a.token })).body.conversations.find(x => x.id === conv).accepted, true);
   });
   await test("outsider cannot read or post to the conversation", async () => {
     const msg = { id: randomUUID(), conversationId: conv, enc: blob(32), ciphertext: blob(40), keyVersion: a.user.keyVersion, sentAt: 1 };
@@ -143,6 +154,55 @@ globalThis.runChatTests = async function ({ BASE, CODE, A, B, C }) {
     assert.equal((await api("/v1/lookup", { method: "POST", token: a.token, body: { phone: C } })).body.found, false);
     assert.equal((await api("/v1/conversations", { method: "POST", token: a.token, body: { userId: c.user.id } })).status, 404);
     await api("/v1/blocks/" + a.user.id, { method: "DELETE", token: c.token });
+  });
+  await test("requests off: nobody new can start a chat", async () => {
+    await api("/v1/me", { method: "PATCH", token: c.token, body: { allowRequests: false } });
+    const l = await api("/v1/lookup", { method: "POST", token: b.token, body: { phone: C } });
+    if (l.body.found) assert.equal(l.body.user.acceptsRequests, l.body.user.acceptsRequests); // existing contacts may still be allowed
+    const r = await api("/v1/conversations", { method: "POST", token: b.token, body: { userId: c.user.id } });
+    const existing = (await api("/v1/conversations", { token: b.token })).body.conversations.some(x => x.partner.id === c.user.id);
+    if (!existing) assert.equal(r.status, 404);
+    await api("/v1/me", { method: "PATCH", token: c.token, body: { allowRequests: true } });
+  });
+  await test("read receipts off → sender only sees delivered", async () => {
+    await api("/v1/me", { method: "PATCH", token: b.token, body: { readReceipts: false } });
+    const m2 = { id: randomUUID(), conversationId: conv, enc: blob(32), ciphertext: blob(48), keyVersion: b.user.keyVersion, sentAt: 2 };
+    const kv = (await api("/v1/conversations", { token: a.token })).body.conversations.find(x => x.id === conv).partner.keyVersion;
+    assert.equal((await api("/v1/messages", { method: "POST", token: a.token, body: { ...m2, keyVersion: kv } })).status, 200);
+    await api("/v1/messages/ack", { method: "POST", token: b.token, body: { read: [m2.id] } });
+    const ev = (await api("/v1/sync?after=0&events=0", { token: a.token })).body.events.filter(e => e.type === "status");
+    assert.ok(ev.some(e => e.payload.delivered.includes(m2.id)), "delivered reported");
+    assert.ok(!ev.some(e => e.payload.read.includes(m2.id)), "read must be hidden");
+    await api("/v1/me", { method: "PATCH", token: b.token, body: { readReceipts: true } });
+  });
+  await test("profile picture respects visibility", async () => {
+    const jpeg = "/9j/" + blob(30);
+    assert.equal((await api("/v1/me/avatar", { method: "PUT", token: b.token, body: { avatar: jpeg } })).status, 200);
+    assert.equal((await api("/v1/me/avatar", { method: "PUT", token: b.token, body: { avatar: "iVBOR" + blob(30) } })).status, 400, "non-JPEG rejected");
+    assert.equal((await api("/v1/lookup", { method: "POST", token: c.token, body: { phone: B } })).body.user.avatar, jpeg);
+    await api("/v1/me", { method: "PATCH", token: b.token, body: { profileVisibility: "nobody" } });
+    assert.equal((await api("/v1/lookup", { method: "POST", token: c.token, body: { phone: B } })).body.user.avatar, undefined);
+    await api("/v1/me", { method: "PATCH", token: b.token, body: { profileVisibility: "everyone" } });
+    await api("/v1/me/avatar", { method: "PUT", token: b.token, body: { avatar: null } });
+  });
+  await test("typing indicator reaches only the partner", async () => {
+    assert.equal((await api("/v1/conversations/" + conv + "/typing", { method: "POST", token: a.token })).status, 200);
+    assert.equal((await api("/v1/conversations/" + conv + "/typing", { method: "POST", token: c.token })).status, 404);
+    assert.ok((await api("/v1/sync?after=0&events=0", { token: b.token })).body.events.some(e => e.type === "typing" && e.payload.conversationId === conv));
+  });
+  await test("encrypted media: members only, owner can delete", async () => {
+    const bytes = rnd(4096);
+    const up = await fetch(BASE + "/v1/media?conversationId=" + conv, { method: "POST", headers: { authorization: "Bearer " + a.token, "content-type": "application/octet-stream" }, body: bytes });
+    assert.equal(up.status, 200); const { id: mid } = await up.json();
+    const outsiderUp = await fetch(BASE + "/v1/media?conversationId=" + conv, { method: "POST", headers: { authorization: "Bearer " + c.token }, body: bytes });
+    assert.equal(outsiderUp.status, 404);
+    const dl = await fetch(BASE + "/v1/media/" + mid, { headers: { authorization: "Bearer " + b.token } });
+    assert.equal(dl.status, 200);
+    const got = new Uint8Array(await dl.arrayBuffer());
+    assert.equal(got.length, 4096); assert.equal(got[100], bytes[100]);
+    assert.equal((await fetch(BASE + "/v1/media/" + mid, { headers: { authorization: "Bearer " + c.token } })).status, 404, "outsider cannot download");
+    await fetch(BASE + "/v1/media/" + mid, { method: "DELETE", headers: { authorization: "Bearer " + a.token } });
+    assert.equal((await fetch(BASE + "/v1/media/" + mid, { headers: { authorization: "Bearer " + b.token } })).status, 404, "deleted");
   });
   await test("report accepted", async () => {
     assert.equal((await api("/v1/reports", { method: "POST", token: a.token, body: { userId: c.user.id, reason: "test report" } })).status, 200);

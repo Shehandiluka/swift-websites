@@ -5,7 +5,8 @@ recipient's device acknowledges delivery, then clears it. It never receives mess
 Phone numbers are stored only as HMAC-SHA256(pepper, E.164); the pepper is generated inside D1 on first use.
 
 ## Deploy
-1. D1 database `swiftakuru-chat` (id in `wrangler.jsonc`). Apply `schema.sql` once (`npx wrangler d1 execute swiftakuru-chat --remote --file schema.sql`).
+1. D1 database `swiftakuru-chat` (id in `wrangler.jsonc`). Apply `schema.sql` once, then each file in `migrations/` in order (`npx wrangler d1 execute swiftakuru-chat --remote --file …`).
+   R2 bucket `swiftakuru-chat-media` (binding `MEDIA`) holds encrypted attachments only.
 2. Cloudflare dashboard → Workers → Create → Import a repository → `swift-websites`, root directory `chat.swiftlk.com`.
 3. Test numbers (no SMS cost): `INSERT OR REPLACE INTO config (k,v) VALUES ('test_numbers','{"+94700000001":"<6-digit code>"}')`.
 4. Real SMS (optional): add secrets `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` to the worker. Without them, real numbers get `503 sms_not_configured`.
@@ -27,4 +28,8 @@ Phone numbers are stored only as HMAC-SHA256(pepper, E.164); the pepper is gener
 | GET | /sync?after=&events= | undelivered messages + events |
 | POST | /messages/ack `{delivered[], read[]}`, /events/ack `{upTo}` | delivery/read receipts, clears ciphertext |
 | POST | /secret/invite, /secret/respond, /secret/leave, /secret/resolve; GET /secret/invitations | Secret Chat consent flow |
+| POST | /conversations/:id/accept | accept a message request (replying also accepts) |
+| POST | /conversations/:id/typing | typing indicator (event to partner) |
+| PUT | /me/avatar `{avatar: base64 JPEG \| null}` | profile picture (visibility: everyone / contacts / nobody) |
+| POST / GET / DELETE | /media?conversationId=, /media/:id | encrypted attachment bytes in R2 (≤ 25 MB) |
 | GET/POST/DELETE | /blocks, POST /reports | safety |

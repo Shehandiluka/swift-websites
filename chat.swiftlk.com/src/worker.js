@@ -7,6 +7,9 @@
 
 const DAY = 86400, HOUR = 3600;
 const MAX_CIPHERTEXT = 24 * 1024;          // base64 characters
+const MAX_MEDIA = 25 * 1024 * 1024;        // encrypted attachment bytes
+const MAX_AVATAR = 90 * 1024;              // base64 JPEG characters
+const VIS = ["everyone", "contacts", "nobody"];
 const INVITE_TTL = 2 * DAY;
 const MESSAGE_TTL = 30 * DAY;              // undelivered messages and delivered metadata are purged after this
 const OTP_TTL = 5 * 60;
@@ -113,11 +116,14 @@ async function auth(req, env) {
   if (!m) fail(401, "unauthorized");
   const th = await sha256(m[1]);
   const row = await env.DB.prepare(
-    `SELECT s.user_id, s.last_seen, u.display_name, u.discoverable, u.kem_pub, u.key_version
+    `SELECT s.user_id, s.last_seen, u.display_name, u.discoverable, u.kem_pub, u.key_version, u.read_receipts
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND u.deleted_at IS NULL`).bind(th).first();
   if (!row) fail(401, "unauthorized");
-  if (now() - row.last_seen > 300) await env.DB.prepare("UPDATE sessions SET last_seen=? WHERE token_hash=?").bind(now(), th).run();
-  return { id: row.user_id, tokenHash: th, displayName: row.display_name, discoverable: !!row.discoverable, kemPub: row.kem_pub, keyVersion: row.key_version };
+  if (now() - row.last_seen > 60) await env.DB.batch([
+    env.DB.prepare("UPDATE sessions SET last_seen=? WHERE token_hash=?").bind(now(), th),
+    env.DB.prepare("UPDATE users SET last_seen=? WHERE id=?").bind(now(), row.user_id),
+  ]);
+  return { id: row.user_id, tokenHash: th, displayName: row.display_name, discoverable: !!row.discoverable, kemPub: row.kem_pub, keyVersion: row.key_version, readReceipts: row.read_receipts !== 0 };
 }
 
 async function testCode(env, ph) {
@@ -205,10 +211,20 @@ async function rotateKey(env, uid, kem) {
 }
 
 async function meJSON(env, uid) {
-  const u = await env.DB.prepare("SELECT id, display_name, discoverable, kem_pub, key_version, created_at FROM users WHERE id=?").bind(uid).first();
-  return { id: u.id, displayName: u.display_name, discoverable: !!u.discoverable, kemPub: u.kem_pub, keyVersion: u.key_version, createdAt: u.created_at };
+  const u = await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(uid).first();
+  return { id: u.id, displayName: u.display_name, discoverable: !!u.discoverable, kemPub: u.kem_pub, keyVersion: u.key_version, createdAt: u.created_at,
+           avatar: u.avatar || null, allowRequests: u.allow_requests !== 0, profileVisibility: u.profile_visibility || "everyone",
+           lastSeenVisibility: u.last_seen_visibility || "contacts", readReceipts: u.read_receipts !== 0 };
 }
 const publicUser = u => ({ id: u.id, displayName: u.display_name, kemPub: u.kem_pub, keyVersion: u.key_version });
+// What `viewer` may see of `u`. contact = they share an accepted conversation.
+function visibleUser(u, contact) {
+  const out = publicUser(u);
+  const pv = u.profile_visibility || "everyone", lv = u.last_seen_visibility || "contacts";
+  if (u.avatar && (pv === "everyone" || (pv === "contacts" && contact))) out.avatar = u.avatar;
+  if (u.last_seen && (lv === "everyone" || (lv === "contacts" && contact))) out.lastSeen = u.last_seen;
+  return out;
+}
 
 async function event(env, uid, type, payload) {
   await env.DB.prepare("INSERT INTO events (user_id, type, payload, created_at) VALUES (?,?,?,?)").bind(uid, type, JSON.stringify(payload), now()).run();
@@ -221,7 +237,7 @@ async function isBlockedEither(env, a, b) {
 
 async function membership(env, me, cid) {
   const c = await env.DB.prepare(
-    `SELECT c.id, c.user_a, c.user_b, c.secret FROM conversations c JOIN conversation_members m ON m.conversation_id=c.id AND m.user_id=?2 WHERE c.id=?1`).bind(cid, me).first();
+    `SELECT c.id, c.user_a, c.user_b, c.secret, c.accepted, c.requested_by FROM conversations c JOIN conversation_members m ON m.conversation_id=c.id AND m.user_id=?2 WHERE c.id=?1`).bind(cid, me).first();
   if (!c) fail(404, "not_found");          // same answer for "doesn't exist" and "not yours"
   c.other = c.user_a === me ? c.user_b : c.user_a;
   return c;
@@ -242,6 +258,21 @@ async function route(req, env, url) {
     const b = await body(req);
     if (b.displayName !== undefined) await env.DB.prepare("UPDATE users SET display_name=? WHERE id=?").bind(str(b.displayName, 40, "name"), me.id).run();
     if (b.discoverable !== undefined) await env.DB.prepare("UPDATE users SET discoverable=? WHERE id=?").bind(b.discoverable ? 1 : 0, me.id).run();
+    if (b.allowRequests !== undefined) await env.DB.prepare("UPDATE users SET allow_requests=? WHERE id=?").bind(b.allowRequests ? 1 : 0, me.id).run();
+    if (b.readReceipts !== undefined) await env.DB.prepare("UPDATE users SET read_receipts=? WHERE id=?").bind(b.readReceipts ? 1 : 0, me.id).run();
+    if (b.profileVisibility !== undefined) { if (!VIS.includes(b.profileVisibility)) fail(400, "bad_visibility"); await env.DB.prepare("UPDATE users SET profile_visibility=? WHERE id=?").bind(b.profileVisibility, me.id).run(); }
+    if (b.lastSeenVisibility !== undefined) { if (!VIS.includes(b.lastSeenVisibility)) fail(400, "bad_visibility"); await env.DB.prepare("UPDATE users SET last_seen_visibility=? WHERE id=?").bind(b.lastSeenVisibility, me.id).run(); }
+    return json({ user: await meJSON(env, me.id) });
+  }
+  if (p === "/v1/me/avatar" && M === "PUT") {
+    const b = await body(req);
+    let a = null;
+    if (b.avatar !== null) {
+      if (typeof b.avatar !== "string" || !B64.test(b.avatar) || b.avatar.length > MAX_AVATAR || !b.avatar.startsWith("/9j/")) fail(400, "bad_avatar"); // JPEG only
+      a = b.avatar;
+    }
+    await limit(env, "avatar:" + me.id, 20, DAY);
+    await env.DB.prepare("UPDATE users SET avatar=? WHERE id=?").bind(a, me.id).run();
     return json({ user: await meJSON(env, me.id) });
   }
   if (p === "/v1/me" && M === "DELETE") return deleteAccount(env, me);
@@ -266,20 +297,24 @@ async function route(req, env, url) {
     const ph = await phoneHash(env, phone(b.phone));
     await limit(env, "lookup:" + me.id, 20, HOUR);
     await limit(env, "lookup-ip:" + clientIP(req), 200, HOUR);
-    const u = await env.DB.prepare("SELECT id, display_name, kem_pub, key_version FROM users WHERE phone_hash=? AND discoverable=1 AND deleted_at IS NULL").bind(ph).first();
+    const u = await env.DB.prepare("SELECT * FROM users WHERE phone_hash=? AND discoverable=1 AND deleted_at IS NULL").bind(ph).first();
     // Identical answer for: no account, hidden account, blocked, yourself.
     if (!u || u.id === me.id || await isBlockedEither(env, me.id, u.id)) return json({ found: false });
-    return json({ found: true, user: publicUser(u) });
+    const contact = await env.DB.prepare("SELECT 1 FROM conversations WHERE ((user_a=?1 AND user_b=?2) OR (user_a=?2 AND user_b=?1)) AND accepted=1").bind(me.id, u.id).first();
+    const out = visibleUser(u, !!contact); delete out.lastSeen;
+    out.acceptsRequests = u.allow_requests !== 0 || !!contact;
+    return json({ found: true, user: out });
   }
 
   if (p === "/v1/conversations" && M === "GET") {
     const rows = await env.DB.prepare(
-      `SELECT c.id, c.secret, c.created_at, u.id AS uid, u.display_name, u.kem_pub, u.key_version, u.deleted_at
+      `SELECT c.id AS cid, c.secret, c.created_at AS c_created, c.accepted, c.requested_by, u.*
        FROM conversation_members m JOIN conversations c ON c.id=m.conversation_id
        JOIN users u ON u.id = CASE WHEN c.user_a=?1 THEN c.user_b ELSE c.user_a END
        WHERE m.user_id=?1 AND m.hidden=0 ORDER BY c.created_at DESC LIMIT 500`).bind(me.id).all();
-    return json({ conversations: rows.results.map(r => ({ id: r.id, secret: !!r.secret, createdAt: r.created_at,
-      partner: r.deleted_at ? { id: r.uid, displayName: "Deleted account", kemPub: null, keyVersion: 0, deleted: true } : publicUser({ id: r.uid, display_name: r.display_name, kem_pub: r.kem_pub, key_version: r.key_version }) })) });
+    return json({ conversations: rows.results.map(r => ({ id: r.cid, secret: !!r.secret, createdAt: r.c_created,
+      accepted: r.accepted !== 0, requestedBy: r.requested_by || null,
+      partner: r.deleted_at ? { id: r.id, displayName: "Deleted account", kemPub: null, keyVersion: 0, deleted: true } : visibleUser(r, r.accepted !== 0) })) });
   }
   if (p === "/v1/conversations" && M === "POST") {
     const b = await body(req);
@@ -288,12 +323,14 @@ async function route(req, env, url) {
     const [a, z] = [me.id, other].sort();
     let c = await env.DB.prepare("SELECT id FROM conversations WHERE user_a=? AND user_b=?").bind(a, z).first();
     if (!c) {
-      const u = await env.DB.prepare("SELECT id FROM users WHERE id=? AND discoverable=1 AND deleted_at IS NULL").bind(other).first();
+      const u = await env.DB.prepare("SELECT id FROM users WHERE id=? AND discoverable=1 AND allow_requests<>0 AND deleted_at IS NULL").bind(other).first();
       if (!u || await isBlockedEither(env, me.id, other)) fail(404, "not_found");
       await limit(env, "newconv:" + me.id, 30, DAY);
       c = { id: uuid() };
+      // A new conversation is a message REQUEST until the other person accepts (or replies).
       await env.DB.batch([
-        env.DB.prepare("INSERT INTO conversations (id, user_a, user_b, created_at) VALUES (?,?,?,?)").bind(c.id, a, z, now()),
+        env.DB.prepare("INSERT INTO conversations (id, user_a, user_b, created_at, accepted, requested_by) VALUES (?,?,?,?,0,?)").bind(c.id, a, z, now(), me.id),
+        env.DB.prepare("INSERT INTO events (user_id, type, payload, created_at) VALUES (?,?,?,?)").bind(other, "request", JSON.stringify({ conversationId: c.id, fromUser: me.id, fromName: me.displayName }), now()),
         env.DB.prepare("INSERT INTO conversation_members (conversation_id, user_id) VALUES (?,?)").bind(c.id, a),
         env.DB.prepare("INSERT INTO conversation_members (conversation_id, user_id) VALUES (?,?)").bind(c.id, z),
       ]);
@@ -303,6 +340,21 @@ async function route(req, env, url) {
     return json({ conversationId: c.id });
   }
   let m;
+  if ((m = p.match(/^\/v1\/conversations\/([0-9a-f-]{36})\/accept$/)) && M === "POST") {
+    const c = await membership(env, me.id, id(m[1]));
+    if (c.requested_by === me.id) fail(403, "own_request");
+    if (!c.accepted) {
+      await env.DB.prepare("UPDATE conversations SET accepted=1 WHERE id=?").bind(c.id).run();
+      for (const u of [me.id, c.other]) await event(env, u, "accepted", { conversationId: c.id });
+    }
+    return json({ ok: true });
+  }
+  if ((m = p.match(/^\/v1\/conversations\/([0-9a-f-]{36})\/typing$/)) && M === "POST") {
+    const c = await membership(env, me.id, id(m[1]));
+    await limit(env, "typing:" + me.id, 20, 60);
+    if (c.accepted && !(await isBlockedEither(env, me.id, c.other))) await event(env, c.other, "typing", { conversationId: c.id, at: now() });
+    return json({ ok: true });
+  }
   if ((m = p.match(/^\/v1\/conversations\/([0-9a-f-]{36})$/)) && M === "DELETE") {
     const c = await membership(env, me.id, id(m[1]));
     await env.DB.prepare("UPDATE conversation_members SET hidden=1 WHERE conversation_id=? AND user_id=?").bind(c.id, me.id).run();
@@ -332,6 +384,10 @@ async function route(req, env, url) {
        VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING RETURNING seq`)
       .bind(mid, c.id, me.id, c.other, b.enc, b.ciphertext, kv, sentAt, now()).first();
     await env.DB.prepare("UPDATE conversation_members SET hidden=0 WHERE conversation_id=?").bind(c.id).run();
+    if (!c.accepted && c.requested_by !== me.id) {   // replying to a request accepts it
+      await env.DB.prepare("UPDATE conversations SET accepted=1 WHERE id=?").bind(c.id).run();
+      for (const u of [me.id, c.other]) await event(env, u, "accepted", { conversationId: c.id });
+    }
     return json({ seq: r ? r.seq : 0, duplicate: !r });
   }
 
@@ -364,7 +420,15 @@ async function route(req, env, url) {
         if (r) ((bySender[r.sender_id] ??= {})[field] ??= []).push(mid);
       }
     }
-    for (const [sender, st] of Object.entries(bySender)) await event(env, sender, "status", { delivered: st.delivered || [], read: st.read || [], at: t });
+    for (const [sender, st] of Object.entries(bySender)) {
+      // Read receipts are mutual: if either side turned them off, only "delivered" is reported.
+      let read = st.read || [];
+      if (read.length) {
+        const s2 = await env.DB.prepare("SELECT read_receipts FROM users WHERE id=?").bind(sender).first();
+        if (!me.readReceipts || (s2 && s2.read_receipts === 0)) { st.delivered = [...(st.delivered || []), ...read]; read = []; }
+      }
+      await event(env, sender, "status", { delivered: st.delivered || [], read, at: t });
+    }
     return json({ ok: true });
   }
 
@@ -380,6 +444,7 @@ async function route(req, env, url) {
     const b = await body(req);
     const c = await membership(env, me.id, id(b.conversationId, "conversation"));
     if (c.secret) fail(409, "already_secret");
+    if (!c.accepted) fail(409, "not_accepted");
     if (await isBlockedEither(env, me.id, c.other)) fail(404, "not_found");
     await limit(env, "invite:" + me.id, 20, DAY);
     const t = now();
@@ -436,6 +501,34 @@ async function route(req, env, url) {
     return json({ found: true, conversationId: r.cid, user: publicUser(r) });
   }
 
+  // ---- Encrypted attachments (R2). The phone encrypts the file with a random key that travels
+  // inside the end-to-end encrypted message; the server only stores opaque bytes.
+  if (p === "/v1/media" && M === "POST") {
+    const c = await membership(env, me.id, id(url.searchParams.get("conversationId"), "conversation"));
+    if (await isBlockedEither(env, me.id, c.other)) fail(404, "not_found");
+    const len = Number(req.headers.get("content-length") || 0);
+    if (!len || len > MAX_MEDIA) fail(413, "too_large");
+    await limit(env, "media:" + me.id, 60, HOUR);
+    const mid = uuid();
+    const obj = await env.MEDIA.put("m/" + mid, req.body, { httpMetadata: { contentType: "application/octet-stream" } });
+    if (!obj || obj.size > MAX_MEDIA) { await env.MEDIA.delete("m/" + mid); fail(413, "too_large"); }
+    await env.DB.prepare("INSERT INTO media (id, owner, conversation_id, size, created_at) VALUES (?,?,?,?,?)").bind(mid, me.id, c.id, obj.size, now()).run();
+    return json({ id: mid, size: obj.size });
+  }
+  if ((m = p.match(/^\/v1\/media\/([0-9a-f-]{36})$/)) && M === "GET") {
+    const row = await env.DB.prepare("SELECT conversation_id FROM media WHERE id=?").bind(id(m[1])).first();
+    if (!row) fail(404, "not_found");
+    await membership(env, me.id, row.conversation_id);
+    const obj = await env.MEDIA.get("m/" + m[1]);
+    if (!obj) fail(404, "not_found");
+    return new Response(obj.body, { headers: { "content-type": "application/octet-stream", "cache-control": "private, no-store", ...cors() } });
+  }
+  if ((m = p.match(/^\/v1\/media\/([0-9a-f-]{36})$/)) && M === "DELETE") {
+    const row = await env.DB.prepare("SELECT id FROM media WHERE id=? AND owner=?").bind(id(m[1]), me.id).first();
+    if (row) { await env.MEDIA.delete("m/" + row.id); await env.DB.prepare("DELETE FROM media WHERE id=?").bind(row.id).run(); }
+    return json({ ok: true });
+  }
+
   if (p === "/v1/blocks" && M === "POST") {
     const b = await body(req);
     const other = id(b.userId, "user");
@@ -473,7 +566,8 @@ async function deleteAccount(env, me) {
     env.DB.prepare("DELETE FROM events WHERE user_id=?").bind(uid),
     env.DB.prepare("DELETE FROM secret_invitations WHERE from_user=? OR to_user=?").bind(uid, uid),
     env.DB.prepare("DELETE FROM blocks WHERE blocker=?").bind(uid),
-    env.DB.prepare("UPDATE users SET deleted_at=?, phone_hash='deleted:'||id, display_name='Deleted account', discoverable=0, kem_pub='' WHERE id=?").bind(now(), uid),
+    env.DB.prepare("DELETE FROM media WHERE owner=?").bind(uid),
+    env.DB.prepare("UPDATE users SET deleted_at=?, phone_hash='deleted:'||id, display_name='Deleted account', discoverable=0, kem_pub='', avatar=NULL WHERE id=?").bind(now(), uid),
   ]);
   const t = now();
   const evs = convs.results.map(c => env.DB.prepare("INSERT INTO events (user_id, type, payload, created_at) VALUES (?,?,?,?)").bind(c.other, "conversation", JSON.stringify({ conversationId: c.id, partnerDeleted: true }), t));
@@ -483,6 +577,8 @@ async function deleteAccount(env, me) {
 
 async function cleanup(env) {
   const t = now();
+  const old = await env.DB.prepare("SELECT id FROM media WHERE created_at < ? LIMIT 40").bind(t - MESSAGE_TTL).all();
+  for (const r of old.results) { await env.MEDIA.delete("m/" + r.id); await env.DB.prepare("DELETE FROM media WHERE id=?").bind(r.id).run(); }
   await env.DB.batch([
     env.DB.prepare("DELETE FROM messages WHERE created_at < ?").bind(t - MESSAGE_TTL),
     env.DB.prepare("DELETE FROM events WHERE created_at < ?").bind(t - MESSAGE_TTL),
