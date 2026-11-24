@@ -71,6 +71,7 @@ globalThis.runChatTests = async function ({ BASE, CODE, A, B, C }) {
     const r2 = await api("/v1/conversations", { method: "POST", token: b.token, body: { userId: a.user.id } });
     assert.equal(r1.status, 200); assert.equal(r1.body.conversationId, r2.body.conversationId);
     conv = r1.body.conversationId;
+    await api("/v1/secret/leave", { method: "POST", token: a.token, body: { conversationId: conv } }); // reset from earlier runs
   });
   await test("outsider cannot read or post to the conversation", async () => {
     const msg = { id: randomUUID(), conversationId: conv, enc: blob(32), ciphertext: blob(40), keyVersion: a.user.keyVersion, sentAt: 1 };
