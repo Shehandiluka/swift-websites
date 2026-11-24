@@ -199,7 +199,9 @@ async function rotateKey(env, uid, kem) {
   const partners = await env.DB.prepare(
     `SELECT CASE WHEN c.user_a=?1 THEN c.user_b ELSE c.user_a END AS other FROM conversations c WHERE c.user_a=?1 OR c.user_b=?1`).bind(uid).all();
   const u = await env.DB.prepare("SELECT kem_pub, key_version FROM users WHERE id=?").bind(uid).first();
-  for (const r of partners.results) await event(env, r.other, "key_changed", { userId: uid, kemPub: u.kem_pub, keyVersion: u.key_version });
+  const payload = JSON.stringify({ userId: uid, kemPub: u.kem_pub, keyVersion: u.key_version }), t2 = now();
+  const stmts = partners.results.map(r => env.DB.prepare("INSERT INTO events (user_id, type, payload, created_at) VALUES (?,?,?,?)").bind(r.other, "key_changed", payload, t2));
+  for (let i = 0; i < stmts.length; i += 40) await env.DB.batch(stmts.slice(i, i + 40));
 }
 
 async function meJSON(env, uid) {
@@ -348,8 +350,9 @@ async function route(req, env, url) {
 
   if (p === "/v1/messages/ack" && M === "POST") {
     const b = await body(req);
-    const delivered = Array.isArray(b.delivered) ? b.delivered.slice(0, 500).map(x => id(x, "message")) : [];
-    const read = Array.isArray(b.read) ? b.read.slice(0, 500).map(x => id(x, "message")) : [];
+    // ≤ 30 ids per call: the Workers Free plan allows 50 D1 queries per request (client sends chunks of 20).
+    const delivered = Array.isArray(b.delivered) ? b.delivered.slice(0, 30).map(x => id(x, "message")) : [];
+    const read = Array.isArray(b.read) ? b.read.slice(0, Math.max(0, 30 - delivered.length)).map(x => id(x, "message")) : [];
     const t = now();
     const bySender = {};
     for (const [list, field] of [[delivered, "delivered"], [read, "read"]]) {
@@ -472,7 +475,9 @@ async function deleteAccount(env, me) {
     env.DB.prepare("DELETE FROM blocks WHERE blocker=?").bind(uid),
     env.DB.prepare("UPDATE users SET deleted_at=?, phone_hash='deleted:'||id, display_name='Deleted account', discoverable=0, kem_pub='' WHERE id=?").bind(now(), uid),
   ]);
-  for (const c of convs.results) await event(env, c.other, "conversation", { conversationId: c.id, partnerDeleted: true });
+  const t = now();
+  const evs = convs.results.map(c => env.DB.prepare("INSERT INTO events (user_id, type, payload, created_at) VALUES (?,?,?,?)").bind(c.other, "conversation", JSON.stringify({ conversationId: c.id, partnerDeleted: true }), t));
+  for (let i = 0; i < evs.length; i += 40) await env.DB.batch(evs.slice(i, i + 40));
   return json({ ok: true });
 }
 
