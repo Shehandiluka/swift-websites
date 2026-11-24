@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "swiftakuru-chat",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "d1_databases": [
+    { "binding": "DB", "database_name": "swiftakuru-chat", "database_id": "6ad84d1c-75ea-4d48-b485-1d7587fc4531" }
+  ],
+  "observability": { "enabled": false }
+  // Optional secrets for real SMS (set in the dashboard, never in this file):
+  //   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM
+}

@@ -1,0 +1,3 @@
+{ "name": "swiftakuru-chat", "private": true, "type": "module",
+  "scripts": { "dev": "wrangler dev", "deploy": "wrangler deploy", "test:api": "node test/api.test.mjs" },
+  "devDependencies": { "wrangler": "^4" } }
