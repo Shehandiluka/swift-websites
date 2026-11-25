@@ -51,6 +51,12 @@ th{color:var(--mute);font-weight:600;font-size:12px}td img{width:26px;height:26p
 <div class="tabs"><button class="on" id="tu" onclick="tab('u')">Users</button><button id="ti" onclick="tab('i')">Installs</button>
 <span class="sp" style="flex:1"></span><input id="q" placeholder="Search users…" oninput="users()"></div>
 <div class="card tw" id="tbl"></div>
+<div class="grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
+ <div class="card"><h2>Chat testers (test OTP)</h2><p class="mute" style="font-size:13px;margin-top:0">Only these numbers can sign in with the test code <b id="tcode"></b>. Everyone else needs a real SMS code.</p>
+  <div id="testers"></div><div style="display:flex;gap:8px;margin-top:10px"><input id="tph" placeholder="+94771234567" style="flex:1"><button onclick="tester('POST')">Add</button></div></div>
+ <div class="card"><h2>Admin password</h2><p class="mute" style="font-size:13px;margin-top:0">At least 12 characters. Changing it signs out every other admin session.</p>
+  <input id="npw" type="password" placeholder="New password" style="width:100%" autocomplete="new-password"><button class="primary" style="margin-top:10px" onclick="chpw()">Change password</button><p id="pwmsg" class="mute"></p></div>
+</div>
 <p class="mute" style="font-size:12px;margin-top:16px">Only app version, device model, iOS version, language and keyboard on/off are collected — never anything a user types.</p>
 </main></div>
 <script>
@@ -78,7 +84,7 @@ async function load(){
  $('dax').innerHTML=`<span>${days[0]}</span><span>${days[29]}</span>`;
  bars('versions',s.versions);bars('ios',s.ios,k=>k?'iOS '+k:'—');bars('models',s.models);bars('sources',s.sources);
  $('upd').textContent='Updated '+new Date().toLocaleTimeString();
- tab(cur)}
+ tab(cur);testers()}
 async function users(){const d=await api('users?q='+encodeURIComponent($('q').value));
  $('tbl').innerHTML=d.users.length?`<table><tr><th>User</th><th>Email</th><th>Plan</th><th>Joined</th><th>Last seen</th><th>Version</th><th>Device</th><th>Devices</th><th></th></tr>${d.users.map(u=>`<tr>
  <td>${u.picture?`<img src="${esc(u.picture)}" referrerpolicy="no-referrer">`:''}${esc(u.name)}</td><td>${esc(u.email)}</td>
@@ -89,6 +95,11 @@ async function installs(){const d=await api('installs');
  $('tbl').innerHTML=d.installs.length?`<table><tr><th>Install</th><th>Account</th><th>Version</th><th>iOS</th><th>Device</th><th>Lang</th><th>Via</th><th>Keyboard</th><th>Full access</th><th>Opens</th><th>First</th><th>Last</th></tr>${d.installs.map(i=>`<tr>
  <td class="mute">${esc(i.install_id.slice(0,8))}</td><td>${esc(i.email)||'<span class="mute">—</span>'}</td><td>${esc(i.app_version)} (${esc(i.build)})</td><td>${esc(i.ios)}</td><td>${esc(i.model)}</td><td>${esc(i.locale)}</td><td>${esc(i.source)}</td>
  <td>${i.keyboard_on?'<span class="ok">on</span>':'off'}</td><td>${i.full_access==null?'—':i.full_access?'<span class="ok">yes</span>':'no'}</td><td>${i.opens}</td><td>${date(i.first_seen)}</td><td>${ago(i.last_seen)}</td></tr>`).join('')}</table>`:'<p class="mute">No installs yet.</p>'}
+async function testers(){const d=await api('testers');$('tcode').textContent=d.code||'(off)';
+ $('testers').innerHTML=d.testers.length?d.testers.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)"><span>${esc(p)}</span><button onclick="tester('DELETE','${esc(p)}')">Remove</button></div>`).join(''):'<p class="mute">No testers — the test code works for nobody.</p>'}
+async function tester(m,p){await api('testers',{method:m,headers:{'content-type':'application/json'},body:JSON.stringify({phone:p||$('tph').value})});$('tph').value='';testers()}
+async function chpw(){const r=await fetch('/admin/api/password',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:$('npw').value})});
+ $('pwmsg').textContent=r.ok?'✓ Password changed':(r.status===400?'Use at least 12 characters':'Failed');$('npw').value=''}
 function tab(t){cur=t;$('tu').classList.toggle('on',t==='u');$('ti').classList.toggle('on',t==='i');$('q').hidden=t!=='u';t==='u'?users():installs()}
 async function plan(id,p){await api('plan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,plan:p})});users()}
 api('stats').then(()=>load()).catch(()=>{});

@@ -64,7 +64,11 @@ export async function appRoute(req, env, url) {
       ]);
       return json({ ok: true });
     }
-    if (p === "/admin" && M === "GET") return new Response(ADMIN_HTML, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-frame-options": "DENY", "referrer-policy": "no-referrer" } });
+    if (p === "/admin" && M === "GET") return new Response(ADMIN_HTML, { headers: {
+      "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-frame-options": "DENY", "referrer-policy": "no-referrer",
+      "x-content-type-options": "nosniff", "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-security-policy": "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https: data:; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'" } });
     if (p === "/admin/login" && M === "POST") return adminLogin(req, env);
     if (p === "/admin/logout" && M === "POST") return json({ ok: true }, 200, { "set-cookie": "sa_admin=; Path=/admin; Max-Age=0; HttpOnly; Secure; SameSite=Strict" });
     if (p.startsWith("/admin/api/")) { await adminAuth(req, env); return adminApi(p, req, env, url); }
@@ -171,6 +175,7 @@ const accountJSON = a => ({ id: a.id, provider: a.provider, email: a.email, name
 // ---------------------------------------------------------------- admin
 async function adminLogin(req, env) {
   await limit(env, "adminlogin:" + ip(req), 8, 900);
+  await limit(env, "adminlogin:all", 40, 3600);          // also slows down attacks spread over many IPs
   const b = await req.json().catch(() => ({}));
   const stored = await cfg(env, "admin_pw");               // "salt:sha256(salt+password)"
   if (!stored || typeof b.password !== "string") fail(401, "bad_password");
@@ -234,6 +239,32 @@ async function adminApi(p, req, env, url) {
       `SELECT i.install_id, i.app_version, i.build, i.ios, i.model, i.locale, i.source, i.keyboard_on, i.full_access, i.first_seen, i.last_seen, i.opens, a.email
        FROM app_installs i LEFT JOIN app_accounts a ON a.id = i.account_id ORDER BY i.last_seen DESC LIMIT 200`).all()).results;
     return json({ installs: rows });
+  }
+  if (p === "/admin/api/password" && req.method === "POST") {
+    // change the admin password; signs out every other admin session (new cookie key)
+    const b = await req.json().catch(() => ({}));
+    const pw = typeof b.password === "string" ? b.password : "";
+    if (pw.length < 12) fail(400, "too_short");
+    const salt = randomHex(16);
+    const key = randomHex(32), exp = now() + 7 * DAY;
+    await env.DB.batch([
+      env.DB.prepare("UPDATE config SET v=? WHERE k='admin_pw'").bind(salt + ":" + await sha256(salt + pw)),
+      env.DB.prepare("UPDATE config SET v=? WHERE k='admin_key'").bind(key),
+    ]);
+    const cookie = exp + "." + await hmac(key, "admin." + exp);
+    return json({ ok: true }, 200, { "set-cookie": `sa_admin=${cookie}; Path=/admin; Max-Age=${7 * DAY}; HttpOnly; Secure; SameSite=Strict` });
+  }
+  if (p === "/admin/api/testers") {
+    // phone numbers allowed to use the fixed test OTP
+    let list = []; try { list = JSON.parse((await cfg(env, "test_allow")) || "[]"); } catch {}
+    if (req.method === "POST" || req.method === "DELETE") {
+      const b = await req.json().catch(() => ({}));
+      const ph = typeof b.phone === "string" ? b.phone.replace(/[\s\-()]/g, "") : "";
+      if (!/^\+[1-9]\d{7,14}$/.test(ph)) fail(400, "bad_phone");
+      list = req.method === "POST" ? [...new Set([...list, ph])].slice(0, 50) : list.filter(x => x !== ph);
+      await env.DB.prepare("INSERT INTO config (k, v) VALUES ('test_allow', ?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(JSON.stringify(list)).run();
+    }
+    return json({ testers: list, code: await cfg(env, "test_otp_all") });
   }
   if (p === "/admin/api/plan" && req.method === "POST") {
     const b = await req.json().catch(() => ({}));

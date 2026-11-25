@@ -135,11 +135,14 @@ async function testCode(env, ph) {
   try { const map = JSON.parse(row.v); return typeof map[ph] === "string" ? map[ph] : null; } catch { return null; }
 }
 
-// Testing only: while config 'test_otp_all' holds a 6-digit code, every number signs in with it and no SMS is sent.
-// Delete that config row to switch back to real SMS codes.
-async function testCodeAll(env) {
+// Testing only: config 'test_otp_all' holds a fixed 6-digit code, but it works ONLY for the tester numbers the owner
+// lists in the admin dashboard (config 'test_allow'). Everyone else gets a real SMS code — so nobody can sign in
+// as someone else's number with the test code.
+async function testCodeAll(env, p) {
   const row = await env.DB.prepare("SELECT v FROM config WHERE k='test_otp_all'").first();
-  return row && /^\d{6}$/.test(row.v) ? row.v : null;
+  if (!row || !/^\d{6}$/.test(row.v)) return null;
+  const allow = await env.DB.prepare("SELECT v FROM config WHERE k='test_allow'").first();
+  try { return allow && JSON.parse(allow.v).includes(p) ? row.v : null; } catch { return null; }
 }
 
 async function sendSMS(env, to, text) {
@@ -158,7 +161,7 @@ async function authStart(req, env) {
   const ph = await phoneHash(env, p);
   await limit(env, "otp-ip:" + clientIP(req), 30, HOUR);
   await limit(env, "otp-phone:" + ph, 3, 10 * 60);
-  const fixed = (await testCode(env, p)) || (await testCodeAll(env));
+  const fixed = (await testCode(env, p)) || (await testCodeAll(env, p));
   const code = fixed || String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
   const t = now();
   await env.DB.prepare(
