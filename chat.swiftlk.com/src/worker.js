@@ -17,12 +17,15 @@ const E164 = /^\+[1-9]\d{7,14}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const B64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
+import { isAppRoute, appRoute } from "./app.js";
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors() });
     try {
       if (url.pathname === "/" || url.pathname === "/v1/health") return json({ ok: true, service: "swiftakuru-chat", version: 1 });
+      if (isAppRoute(url.pathname)) return await appRoute(request, env, url);
       const res = await route(request, env, url);
       if (Math.random() < 0.02) ctx.waitUntil(cleanup(env));
       return res;

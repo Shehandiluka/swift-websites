@@ -33,3 +33,12 @@ Phone numbers are stored only as HMAC-SHA256(pepper, E.164); the pepper is gener
 | PUT | /me/avatar `{avatar: base64 JPEG \| null}` | profile picture (visibility: everyone / contacts / nobody) |
 | POST / GET / DELETE | /media?conversationId=, /media/:id | encrypted attachment bytes in R2 (≤ 25 MB) |
 | GET/POST/DELETE | /blocks, POST /reports | safety |
+
+
+## Admin dashboard & app accounts
+
+- `/admin` — owner dashboard (installs, active users, versions, devices, Google accounts, give premium). Password hash is stored in D1 `config` as `admin_pw` = `salt:sha256(salt+password)`.
+- `/v1/app/ping` — anonymous app stats (version, iOS, device model, language, keyboard on/off). Never typed text.
+- Google sign-in: `/auth/google/start` → Google → `/auth/google/callback` → `swiftakuru://auth?token=…`.
+  Needs a Google OAuth **Web application** client with redirect URI `https://swiftakuru-chat.shehandsandeep.workers.dev/auth/google/callback`;
+  put its id/secret in D1 `config` as `google_client_id` / `google_client_secret` (or Worker secrets `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`).

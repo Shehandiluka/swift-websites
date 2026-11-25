@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swift Akuru · Admin</title>
+<style>
+:root{--bg:#0c0b14;--card:#16141f;--line:#262236;--text:#ece9f6;--mute:#9a94b2;--acc:#8b5cf6;--acc2:#3b82f6;--ok:#22c55e;--warn:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(12,11,20,.9);backdrop-filter:blur(10px);z-index:2}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:700;font-size:18px}
+header h1{font-size:17px;margin:0;font-weight:650}header .sp{flex:1}
+button,.btn{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font:inherit;cursor:pointer}
+button.primary{background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;font-weight:600}
+main{max-width:1180px;margin:0 auto;padding:22px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.kpi .l{color:var(--mute);font-size:12.5px}.kpi .v{font-size:28px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}.kpi .s{color:var(--mute);font-size:12px}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.card h2{font-size:14px;margin:0 0 12px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.chart{display:flex;align-items:flex-end;gap:3px;height:150px}
+.chart .b{flex:1;background:linear-gradient(180deg,var(--acc),var(--acc2));border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.chart .b:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;padding:3px 6px;border-radius:6px;font-size:11px;white-space:nowrap}
+.axis{display:flex;justify-content:space-between;color:var(--mute);font-size:11px;margin-top:6px}
+.bars .r{display:grid;grid-template-columns:110px 1fr 40px;gap:8px;align-items:center;margin:7px 0;font-size:13px}
+.bars .t{height:8px;background:var(--line);border-radius:6px;overflow:hidden}.bars .t i{display:block;height:100%;background:var(--acc)}
+.tabs{display:flex;gap:6px;margin:22px 0 10px}.tabs button.on{background:var(--acc);border-color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:12px}td img{width:26px;height:26px;border-radius:50%;vertical-align:middle;margin-right:8px}
+.tw{overflow:auto}.pill{padding:2px 8px;border-radius:20px;font-size:11.5px;background:var(--line)}.pill.p{background:var(--acc)}
+.ok{color:var(--ok)}.mute{color:var(--mute)}input{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit}
+#login{max-width:360px;margin:12vh auto;text-align:center}#login .card{padding:28px}#login input{width:100%;margin:14px 0}
+.note{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);color:#fcd34d;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13.5px}
+</style></head><body>
+<div id="login" hidden><div class="logo" style="margin:0 auto 12px;width:54px;height:54px;font-size:28px">අ</div><div class="card">
+<h1 style="margin:0">Swift Akuru Admin</h1><p class="mute">Owner only</p>
+<input id="pw" type="password" placeholder="Admin password" autocomplete="current-password"><button class="primary" style="width:100%" onclick="login()">Sign in</button>
+<p id="err" style="color:#f87171"></p></div></div>
+<div id="app" hidden>
+<header><div class="logo">අ</div><h1>Swift Akuru · Admin</h1><span class="sp"></span><span class="mute" id="upd"></span><button onclick="load()">Refresh</button><button onclick="logout()">Sign out</button></header>
+<main>
+<div id="gnote" class="note" hidden>Google sign-in is not configured yet — add google_client_id / google_client_secret (see README).</div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+ <div class="card"><h2>Daily active installs · 30 days</h2><div class="chart" id="daily"></div><div class="axis" id="dax"></div></div>
+ <div class="card"><h2>App versions (30d)</h2><div class="bars" id="versions"></div></div>
+</div>
+<div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+ <div class="card"><h2>iOS</h2><div class="bars" id="ios"></div></div>
+ <div class="card"><h2>Devices</h2><div class="bars" id="models"></div></div>
+ <div class="card"><h2>Installed via</h2><div class="bars" id="sources"></div></div>
+</div>
+<div class="tabs"><button class="on" id="tu" onclick="tab('u')">Users</button><button id="ti" onclick="tab('i')">Installs</button>
+<span class="sp" style="flex:1"></span><input id="q" placeholder="Search users…" oninput="users()"></div>
+<div class="card tw" id="tbl"></div>
+<p class="mute" style="font-size:12px;margin-top:16px">Only app version, device model, iOS version, language and keyboard on/off are collected — never anything a user types.</p>
+</main></div>
+<script>
+const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ago=t=>{if(!t)return'—';const s=Date.now()/1e3-t;return s<90?'now':s<3600?Math.round(s/60)+'m':s<86400?Math.round(s/3600)+'h':Math.round(s/86400)+'d'};
+const date=t=>t?new Date(t*1e3).toLocaleDateString():'—';
+let cur='u';
+async function api(p,o){const r=await fetch('/admin/api/'+p,o);if(r.status===401){show(false);throw 0}return r.json()}
+function show(ok){$('login').hidden=ok;$('app').hidden=!ok}
+async function login(){$('err').textContent='';const r=await fetch('/admin/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:$('pw').value})});
+ if(r.ok){show(true);load()}else $('err').textContent=r.status===429?'Too many attempts — wait 15 min':'Wrong password'}
+$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+async function logout(){await fetch('/admin/logout',{method:'POST'});show(false)}
+function bars(el,rows,label=k=>k||'—'){const m=Math.max(1,...rows.map(r=>r.c));$(el).innerHTML=rows.length?rows.map(r=>`<div class="r"><span>${esc(label(r.k))}</span><span class="t"><i style="width:${r.c/m*100}%"></i></span><span class="mute">${r.c}</span></div>`).join(''):'<p class="mute">No data yet</p>'}
+async function load(){
+ const s=await api('stats');show(true);$('gnote').hidden=s.googleConfigured;
+ const pct=(a,b)=>b?Math.round(a/b*100)+'%':'—';
+ const k=[['Installs',s.installs,'all time'],['Active today',s.active1,'last 24 h'],['Active 7 days',s.active7,''],['Active 30 days',s.active30,''],
+  ['Google accounts',s.accounts,'+'+s.newAccounts7+' this week'],['Keyboard enabled',pct(s.keyboardOn,s.active30),s.keyboardOn+' of active'],
+  ['Full Access',pct(s.fullAccess,s.active30),''],['Chat users',s.chatUsers,s.messages24h+' messages / 24 h']];
+ $('kpis').innerHTML=k.map(x=>`<div class="kpi"><div class="l">${x[0]}</div><div class="v">${esc(x[1])}</div><div class="s">${esc(x[2])}</div></div>`).join('');
+ const days=[];for(let i=29;i>=0;i--)days.push(new Date(Date.now()-i*864e5).toISOString().slice(0,10));
+ const map=Object.fromEntries(s.daily.map(d=>[d.day,d.c]));const m=Math.max(1,...days.map(d=>map[d]||0));
+ $('daily').innerHTML=days.map(d=>`<div class="b" style="height:${(map[d]||0)/m*100}%" data-t="${d}: ${map[d]||0}"></div>`).join('');
+ $('dax').innerHTML=`<span>${days[0]}</span><span>${days[29]}</span>`;
+ bars('versions',s.versions);bars('ios',s.ios,k=>k?'iOS '+k:'—');bars('models',s.models);bars('sources',s.sources);
+ $('upd').textContent='Updated '+new Date().toLocaleTimeString();
+ tab(cur)}
+async function users(){const d=await api('users?q='+encodeURIComponent($('q').value));
+ $('tbl').innerHTML=d.users.length?`<table><tr><th>User</th><th>Email</th><th>Plan</th><th>Joined</th><th>Last seen</th><th>Version</th><th>Device</th><th>Devices</th><th></th></tr>${d.users.map(u=>`<tr>
+ <td>${u.picture?`<img src="${esc(u.picture)}" referrerpolicy="no-referrer">`:''}${esc(u.name)}</td><td>${esc(u.email)}</td>
+ <td><span class="pill ${u.plan==='premium'?'p':''}">${esc(u.plan)}</span></td><td>${date(u.created_at)}</td><td>${ago(u.last_seen)}</td>
+ <td>${esc(u.version)}</td><td>${esc(u.model)}</td><td>${u.devices}</td>
+ <td><button onclick="plan('${esc(u.id)}','${u.plan==='premium'?'free':'premium'}')">${u.plan==='premium'?'Set free':'Give premium'}</button></td></tr>`).join('')}</table>`:'<p class="mute">No Google accounts yet.</p>'}
+async function installs(){const d=await api('installs');
+ $('tbl').innerHTML=d.installs.length?`<table><tr><th>Install</th><th>Account</th><th>Version</th><th>iOS</th><th>Device</th><th>Lang</th><th>Via</th><th>Keyboard</th><th>Full access</th><th>Opens</th><th>First</th><th>Last</th></tr>${d.installs.map(i=>`<tr>
+ <td class="mute">${esc(i.install_id.slice(0,8))}</td><td>${esc(i.email)||'<span class="mute">—</span>'}</td><td>${esc(i.app_version)} (${esc(i.build)})</td><td>${esc(i.ios)}</td><td>${esc(i.model)}</td><td>${esc(i.locale)}</td><td>${esc(i.source)}</td>
+ <td>${i.keyboard_on?'<span class="ok">on</span>':'off'}</td><td>${i.full_access==null?'—':i.full_access?'<span class="ok">yes</span>':'no'}</td><td>${i.opens}</td><td>${date(i.first_seen)}</td><td>${ago(i.last_seen)}</td></tr>`).join('')}</table>`:'<p class="mute">No installs yet.</p>'}
+function tab(t){cur=t;$('tu').classList.toggle('on',t==='u');$('ti').classList.toggle('on',t==='i');$('q').hidden=t!=='u';t==='u'?users():installs()}
+async function plan(id,p){await api('plan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,plan:p})});users()}
+api('stats').then(()=>load()).catch(()=>{});
+</script></body></html>
